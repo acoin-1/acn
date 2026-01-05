@@ -128,14 +128,30 @@ input, select {
     </div>
 
     <!-- PAYMENT -->
-    <div class="section">
-        <h3>Payment Method</h3>
-        <div class="payment-box">
-            <label><input type="radio" name="pay" checked> Khalti QR</label>
-            <label><input type="radio" name="pay"> eSewa</label>
-            <label><input type="radio" name="pay"> Card (Visa / MasterCard)</label>
-        </div>
+<div class="section">
+    <h3>Payment Method</h3>
+
+    <label>
+        <input type="radio" name="pay" value="eSewa" onclick="showQR('esewa')" checked>
+        eSewa QR
+    </label>
+
+    <label>
+        <input type="radio" name="pay" value="Khalti" onclick="showQR('khalti')">
+        Khalti QR
+    </label>
+
+    <!-- QR BOX -->
+    <div id="qr-box" style="margin-top:15px;">
+        <img id="qr-img" src="esewa-qr.png" alt="QR Code" width="200">
+        <p class="note">Scan QR to pay</p>
     </div>
+
+    <!-- PAYMENT DETAILS -->
+    <input type="text" id="payerPhone" placeholder="Your Phone Number" required>
+    <input type="text" id="txnId" placeholder="Transaction ID (after payment)" required>
+</div>
+
 
     <!-- TRUST & SECURITY -->
     <div class="section">
@@ -163,7 +179,7 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let summary = document.getElementById("order-summary");
 let total = 0;
 
-// Render order summary
+// Render summary
 cart.forEach(item => {
     total += item.price * item.qty;
     summary.innerHTML += `
@@ -175,29 +191,40 @@ cart.forEach(item => {
 });
 document.getElementById("total").innerText = total;
 
-function placeOrder() {
-    if (cart.length === 0) {
-        alert("Your cart is empty");
+// Switch QR
+function showQR(method){
+    const qr = document.getElementById("qr-img");
+    qr.src = method === "khalti" ? "khalti-qr.png" : "esewa-qr.png";
+}
+
+function placeOrder(){
+    if(cart.length === 0){
+        alert("Cart is empty");
         return;
     }
 
     const name = document.querySelector('input[placeholder="Full Name"]').value;
     const email = document.querySelector('input[placeholder="Email Address"]').value;
-    const paymentMethod =
-        document.querySelector('input[name="pay"]:checked').parentElement.innerText.trim();
+    const phone = document.getElementById("payerPhone").value;
+    const txnId = document.getElementById("txnId").value;
+    const payment = document.querySelector('input[name="pay"]:checked').value;
 
-    if (!name || !email) {
-        alert("Please enter your name and email");
+    if(!name || !email || !phone || !txnId){
+        alert("Please complete all payment details");
         return;
     }
 
     const orderData = {
         orderId: "ORD-" + Date.now(),
         customer: { name, email },
-        cart: cart,
-        total: total,
+        cart,
+        total,
         delivery: "Digital Download (Instant)",
-        payment: paymentMethod,
+        payment: {
+            method: payment,
+            phone,
+            transactionId: txnId
+        },
         createdAt: new Date().toLocaleString()
     };
 
@@ -205,6 +232,7 @@ function placeOrder() {
     window.location.href = "order-confirmation.html";
 }
 </script>
+
 
 
 
