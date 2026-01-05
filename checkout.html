@@ -150,9 +150,10 @@ input, select {
 
     <!-- CTA -->
     <div class="section">
-      <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+    <button class="btn-primary" onclick="placeOrder()">Place Order</button>
 
-        <p class="note">You’ll be redirected to payment confirmation.</p>
+
+        <p class="note">You’ll be redirected to order confirmation.</p>
     </div>
 
 </div>
@@ -175,31 +176,36 @@ cart.forEach(item => {
 document.getElementById("total").innerText = total;
 
 function placeOrder() {
-    if(cart.length === 0){
+    if (cart.length === 0) {
         alert("Your cart is empty");
         return;
     }
 
-    const orderData = {
-        customer: {
-            name: document.querySelector('input[placeholder="Full Name"]').value,
-            email: document.querySelector('input[placeholder="Email Address"]').value
-        },
-        cart: cart,
-        total: total,
-        shipping: "Digital Download (Instant)",
-        payment: document.querySelector('input[name="pay"]:checked').parentElement.innerText.trim()
-    };
+    const name = document.querySelector('input[placeholder="Full Name"]').value;
+    const email = document.querySelector('input[placeholder="Email Address"]').value;
+    const paymentMethod =
+        document.querySelector('input[name="pay"]:checked').parentElement.innerText.trim();
 
-    if(!orderData.customer.name || !orderData.customer.email){
-        alert("Please enter name and email");
+    if (!name || !email) {
+        alert("Please enter your name and email");
         return;
     }
 
+    const orderData = {
+        orderId: "ORD-" + Date.now(),
+        customer: { name, email },
+        cart: cart,
+        total: total,
+        delivery: "Digital Download (Instant)",
+        payment: paymentMethod,
+        createdAt: new Date().toLocaleString()
+    };
+
     localStorage.setItem("orderData", JSON.stringify(orderData));
-    window.location.href = "payment-confirmation.html";
+    window.location.href = "order-confirmation.html";
 }
 </script>
+
 
 
 </body>
