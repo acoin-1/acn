@@ -150,7 +150,8 @@ input, select {
 
     <!-- CTA -->
     <div class="section">
-        <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+      <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+
         <p class="note">You’ll be redirected to payment confirmation.</p>
     </div>
 
@@ -161,6 +162,7 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let summary = document.getElementById("order-summary");
 let total = 0;
 
+// Render order summary
 cart.forEach(item => {
     total += item.price * item.qty;
     summary.innerHTML += `
@@ -170,17 +172,35 @@ cart.forEach(item => {
         </div>
     `;
 });
-
 document.getElementById("total").innerText = total;
 
-function placeOrder(){
+function placeOrder() {
     if(cart.length === 0){
         alert("Your cart is empty");
         return;
     }
-    window.location.href = "order-success.html";
+
+    const orderData = {
+        customer: {
+            name: document.querySelector('input[placeholder="Full Name"]').value,
+            email: document.querySelector('input[placeholder="Email Address"]').value
+        },
+        cart: cart,
+        total: total,
+        shipping: "Digital Download (Instant)",
+        payment: document.querySelector('input[name="pay"]:checked').parentElement.innerText.trim()
+    };
+
+    if(!orderData.customer.name || !orderData.customer.email){
+        alert("Please enter name and email");
+        return;
+    }
+
+    localStorage.setItem("orderData", JSON.stringify(orderData));
+    window.location.href = "payment-confirmation.html";
 }
 </script>
+
 
 </body>
 </html>
