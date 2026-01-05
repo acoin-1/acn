@@ -54,11 +54,62 @@ input, select {
     border-radius:5px;
 }
 
-/* Payment */
-.payment-box label {
-    display:block;
-    margin:8px 0;
+.payment-options {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
 }
+
+.pay-card {
+    flex: 1;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background: #fafafa;
+}
+
+.pay-card img {
+    height: 35px;
+    margin-bottom: 6px;
+}
+
+.pay-card input {
+    display: none;
+}
+
+.pay-card span {
+    display: block;
+    font-weight: bold;
+}
+
+.pay-card:hover {
+    border-color: #28a745;
+}
+
+.pay-card input:checked + img,
+.pay-card input:checked ~ span {
+    border-color: #28a745;
+}
+
+.pay-card input:checked ~ span {
+    color: #28a745;
+}
+
+.qr-box {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.qr-box img {
+    width: 200px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 10px;
+}
+
 
 /* Trust */
 .trust {
@@ -127,19 +178,36 @@ input, select {
         <p class="note">Most customers choose instant digital delivery.</p>
     </div>
 
-    <!-- PAYMENT -->
+    <!-- PAYMENT METHOD -->
 <div class="section">
     <h3>Payment Method</h3>
 
-    <label>
-        <input type="radio" name="pay" value="eSewa" onclick="showQR('esewa')" checked>
-        eSewa QR
-    </label>
+    <div class="payment-options">
 
-    <label>
-        <input type="radio" name="pay" value="Khalti" onclick="showQR('khalti')">
-        Khalti QR
-    </label>
+        <label class="pay-card">
+            <input type="radio" name="pay" value="eSewa" checked onclick="showQR('esewa')">
+            <img src="esewa-logo.png" alt="eSewa">
+            <span>eSewa</span>
+        </label>
+
+        <label class="pay-card">
+            <input type="radio" name="pay" value="Khalti" onclick="showQR('khalti')">
+            <img src="khalti-logo.png" alt="Khalti">
+            <span>Khalti</span>
+        </label>
+
+    </div>
+
+    <!-- QR DISPLAY -->
+    <div id="qr-box" class="qr-box">
+        <img id="qr-img" src="esewa-qr.png" alt="QR Code">
+        <p class="note">Scan this QR code using your selected wallet app</p>
+    </div>
+
+    <!-- PAYMENT CONFIRMATION INPUT -->
+    <input type="text" id="payerPhone" placeholder="Phone number used for payment" required>
+    <input type="text" id="txnId" placeholder="Transaction ID after successful payment" required>
+</div>
 
     <!-- QR BOX -->
     <div id="qr-box" style="margin-top:15px;">
