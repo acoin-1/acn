@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.9.0/dist/index.umd.js"></script>
+
   <title>ACN Tap & Earn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -9,6 +11,10 @@
   </style>
 </head>
 <body>
+  
+  <button onclick="connectWallet()">Connect MetaMask</button>
+<p id="walletAddress">Not connected</p>
+
 
 <h1>ACN Tap & Earn</h1>
 <p>Score: <span id="score">0</span></p>
@@ -35,6 +41,37 @@ function claim() {
   alert("You earned " + score + " points = ACN tokens");
 }
 </script>
+
+<script>
+let provider;
+let userAccount;
+
+async function connectWallet() {
+  provider = await window.WalletConnectEthereumProvider.init({
+    projectId: "YOUR_WALLETCONNECT_PROJECT_ID",
+    chains: [42220], // CELO MAINNET
+    methods: ["eth_sendTransaction", "eth_sign"],
+    events: ["chainChanged", "accountsChanged"],
+    showQrModal: true,
+    metadata: {
+      name: "ACN Tap & Earn",
+      description: "Earn ACN tokens by playing",
+      url: "https://yourgame.site",
+      icons: ["https://yourgame.site/logo.png"]
+    }
+  });
+
+  await provider.enable();
+
+  const accounts = await provider.request({ method: "eth_accounts" });
+  userAccount = accounts[0];
+
+  document.getElementById("walletAddress").innerText =
+    "Connected: " + userAccount;
+}
+</script>
+
+
 
 </body>
 </html>
