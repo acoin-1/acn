@@ -44,7 +44,6 @@
 <p>ACN Balance: <span id="balance">0</span></p>
 
 <div>
-    <button class="button" onclick="connectMetaMask()">Connect MetaMask</button>
     <button class="button" onclick="connectWalletConnect()">Connect Wallet (Mobile)</button>
 </div>
 
@@ -92,24 +91,7 @@ const coinFlipAbi = [
 
 let flipHistory = [];
 
-// -------------------- CONNECT WALLETS -------------------- //
-
-// MetaMask connection
-async function connectMetaMask() {
-    if (window.ethereum) {
-        provider = new ethers.BrowserProvider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = await provider.getSigner();
-        userAddress = await signer.getAddress();
-        document.getElementById("wallet").innerText = userAddress;
-
-        setupContracts();
-    } else {
-        alert("MetaMask not found! Please install MetaMask on your device.");
-    }
-}
-
-// WalletConnect connection (mobile wallets)
+// -------------------- WALLETCONNECT -------------------- //
 async function connectWalletConnect() {
     const WalletConnectProvider = window.WalletConnectProvider.default;
     const wcProvider = new WalletConnectProvider({
@@ -152,20 +134,16 @@ async function flip(choice) {
     const amountParsed = ethers.parseUnits(amount, 18);
 
     try {
-        // Approve first
         let approveTx = await acnContract.approve(coinFlipAddress, amountParsed);
         await approveTx.wait();
 
-        // Flip
         let tx = await coinFlipContract.flip(amountParsed, choice);
         document.getElementById("status").innerText = "⏳ Flipping...";
         await tx.wait();
 
-        // Temporary visual coin animation (random)
         let result = Math.random() < 0.5 ? 0 : 1;
         displayCoin(result);
 
-        // Update history
         let win = (result === Number(choice));
         flipHistory.unshift({choice, result, win});
         if(flipHistory.length>5) flipHistory.pop();
@@ -183,7 +161,7 @@ async function flip(choice) {
 function displayCoin(result){
     const coin = document.getElementById("coin");
     coin.style.display = "block";
-    coin.src = result === 0 ? "https://i.imgur.com/9Q6yGxF.png" : "https://i.imgur.com/8i8z2IW.png"; // Heads / Tails images
+    coin.src = result === 0 ? "https://i.imgur.com/9Q6yGxF.png" : "https://i.imgur.com/8i8z2IW.png";
 }
 
 // -------------------- OWNER CHECK -------------------- //
