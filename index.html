@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>ACN Coin Flip DApp</title>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -42,7 +43,10 @@
 <p>Wallet: <span id="wallet">Not Connected</span></p>
 <p>ACN Balance: <span id="balance">0</span></p>
 
-<button class="button" onclick="connectWallet()">Connect Wallet</button>
+<div>
+    <button class="button" onclick="connectMetaMask()">Connect MetaMask</button>
+    <button class="button" onclick="connectWalletConnect()">Connect Wallet (Mobile)</button>
+</div>
 
 <div style="margin-top: 20px;">
     <input type="number" id="betAmount" placeholder="Bet Amount (ACN)">
@@ -88,8 +92,10 @@ const coinFlipAbi = [
 
 let flipHistory = [];
 
-// Connect wallet function
-async function connectWallet() {
+// -------------------- CONNECT WALLETS -------------------- //
+
+// MetaMask connection
+async function connectMetaMask() {
     if (window.ethereum) {
         provider = new ethers.BrowserProvider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
@@ -97,24 +103,48 @@ async function connectWallet() {
         userAddress = await signer.getAddress();
         document.getElementById("wallet").innerText = userAddress;
 
-        acnContract = new ethers.Contract(acnTokenAddress, acnAbi, signer);
-        coinFlipContract = new ethers.Contract(coinFlipAddress, coinFlipAbi, signer);
-
-        updateBalance();
-        checkOwner();
+        setupContracts();
     } else {
-        alert("MetaMask not found!");
+        alert("MetaMask not found! Please install MetaMask on your device.");
     }
 }
 
-// Update ACN balance
+// WalletConnect connection (mobile wallets)
+async function connectWalletConnect() {
+    const WalletConnectProvider = window.WalletConnectProvider.default;
+    const wcProvider = new WalletConnectProvider({
+        rpc: {
+            42220: "https://forno.celo.org" // Celo mainnet RPC
+        },
+        chainId: 42220
+    });
+    await wcProvider.enable();
+
+    provider = new ethers.BrowserProvider(wcProvider);
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
+    document.getElementById("wallet").innerText = userAddress;
+
+    setupContracts();
+}
+
+// -------------------- SETUP CONTRACTS -------------------- //
+function setupContracts() {
+    acnContract = new ethers.Contract(acnTokenAddress, acnAbi, signer);
+    coinFlipContract = new ethers.Contract(coinFlipAddress, coinFlipAbi, signer);
+
+    updateBalance();
+    checkOwner();
+}
+
+// -------------------- BALANCE -------------------- //
 async function updateBalance() {
     if (!acnContract || !userAddress) return;
     const balance = await acnContract.balanceOf(userAddress);
     document.getElementById("balance").innerText = ethers.formatUnits(balance, 18);
 }
 
-// Flip function with animation
+// -------------------- FLIP -------------------- //
 async function flip(choice) {
     const amount = document.getElementById("betAmount").value;
     if (!amount || amount <= 0) { alert("Enter valid amount"); return; }
@@ -131,8 +161,8 @@ async function flip(choice) {
         document.getElementById("status").innerText = "⏳ Flipping...";
         await tx.wait();
 
-        // Randomly display coin animation
-        let result = Math.random() < 0.5 ? 0 : 1; // temporary visual
+        // Temporary visual coin animation (random)
+        let result = Math.random() < 0.5 ? 0 : 1;
         displayCoin(result);
 
         // Update history
@@ -149,14 +179,14 @@ async function flip(choice) {
     }
 }
 
-// Coin animation
+// -------------------- COIN ANIMATION -------------------- //
 function displayCoin(result){
     const coin = document.getElementById("coin");
     coin.style.display = "block";
     coin.src = result === 0 ? "https://i.imgur.com/9Q6yGxF.png" : "https://i.imgur.com/8i8z2IW.png"; // Heads / Tails images
 }
 
-// Check if owner
+// -------------------- OWNER CHECK -------------------- //
 async function checkOwner() {
     const owner = await coinFlipContract.owner();
     if (owner.toLowerCase() === userAddress.toLowerCase()) {
@@ -164,7 +194,7 @@ async function checkOwner() {
     }
 }
 
-// Withdraw (owner)
+// -------------------- WITHDRAW -------------------- //
 async function withdraw() {
     const amount = document.getElementById("withdrawAmount").value;
     if (!amount || amount <= 0) { alert("Enter valid amount"); return; }
@@ -182,7 +212,7 @@ async function withdraw() {
     }
 }
 
-// Render last 5 flips
+// -------------------- HISTORY -------------------- //
 function renderHistory() {
     const container = document.getElementById("flipHistory");
     container.innerHTML = "";
