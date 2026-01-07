@@ -1,1 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ACN Tap & Earn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; text-align: center; background: #0b1220; color: white; }
+    button { font-size: 20px; padding: 15px; margin: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>ACN Tap & Earn</h1>
+<p>Score: <span id="score">0</span></p>
+
+<button onclick="tap()">TAP</button>
+<br>
+<button onclick="connectWallet()">Connect Wallet</button>
+<br>
+<button onclick="claim()">Claim ACN</button>
+
+<script>
+let score = 0;
+
+function tap() {
+  score++;
+  document.getElementById("score").innerText = score;
+}
+
+function connectWallet() {
+  alert("WalletConnect integration here (Valora / MetaMask)");
+}
+
+function claim() {
+  alert("You earned " + score + " points = ACN tokens");
+}
+</script>
+
+</body>
+</html>
 
